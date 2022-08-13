@@ -74,6 +74,10 @@ export class MarcadoresComponent implements AfterViewInit {
         color
       });
       this.persistMarkers(); 
+      
+      nuevoMarcador.on('dragend', () => {
+        this.persistMarkers();
+      });
   }
   
   
@@ -100,7 +104,7 @@ export class MarcadoresComponent implements AfterViewInit {
     if( !localStorage.getItem('marcadores')){
       return
     }
-      const lngLatArr: MarkerFtColor[] = JSON.parse('marcadores')!;
+      const lngLatArr: MarkerFtColor[] = JSON.parse(localStorage.getItem('marcadores')!);
       
       lngLatArr.forEach( m => {
         const renewMarker = new mapboxgl.Marker({
@@ -109,7 +113,26 @@ export class MarcadoresComponent implements AfterViewInit {
         })
           .setLngLat( m.center! )
           .addTo( this.mapa );          
-      })
+        
+          this.marcadores.push({
+            marker: renewMarker,
+            color: m.color
+          });
+
+          renewMarker.on('dragend', () => {
+            this.persistMarkers();
+          });
+      });
+
+      
+  }
+
+
+  deleteMarker( i: number ){
+    this.marcadores[i].marker?.remove();
+    this.marcadores.splice(i , 1);
+
+    this.persistMarkers();
   }
   
 }
